@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIGIPIN Academic Demonstration | ORAIL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+        
+        /* Cross stamp watermark */
+        .cross-stamp {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 120px;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.03);
+            z-index: 1;
+            pointer-events: none;
+            letter-spacing: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            padding: 40px;
+            max-width: 650px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .academic-header {
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .institution {
+            font-size: 14px;
+            color: #6c757d;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        
+        .title {
+            font-size: 28px;
+            color: #1e3c72;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            color: #495057;
+            font-style: italic;
+        }
+        
+        .demo-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin: 15px 0;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+        }
+        
+        .status {
+            padding: 18px;
+            border-radius: 12px;
+            margin: 25px 0;
+            font-weight: 600;
+            border-left: 5px solid;
+        }
+        
+        .status.loading {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border-left-color: #f39c12;
+            color: #856404;
+        }
+        
+        .status.success {
+            background: linear-gradient(135deg, #d4edda, #a8e6cf);
+            border-left-color: #27ae60;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: linear-gradient(135deg, #f8d7da, #fab1a0);
+            border-left-color: #e74c3c;
+            color: #721c24;
+        }
+        
+        .location-panel {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            display: none;
+        }
+        
+        .digipin-display {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 25px 0;
+            display: none;
+        }
+        
+        .digipin-code {
+            font-size: 42px;
+            font-weight: 900;
+            letter-spacing: 4px;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 12px;
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .coordinates-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .coord-item {
+            background: rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .loading-indicator {
+            display: inline-block;
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid #f39c12;
+            border-radius: 50%;
+            animation: rotate 1s linear infinite;
+            margin-right: 12px;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .verification-panel {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+            display: none;
+        }
+        
+        .academic-footer {
+            border-top: 1px solid #e9ecef;
+            padding-top: 20px;
+            margin-top: 30px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .precision-indicator {
+            font-size: 14px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 10px 0;
+        }
+        
+        .status-excellent { color: #27ae60; font-weight: bold; }
+        .status-good { color: #3498db; font-weight: bold; }
+        .status-acceptable { color: #f39c12; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="cross-stamp">✕ DEMO ✕</div>
+    
+    <div class="container">
+        <div class="academic-header">
+            <div class="institution">Academic Demonstration | ORAIL</div>
+            <h1 class="title">DIGIPIN Geospatial System</h1>
+            <p class="subtitle">Digital Postal Index Number Implementation</p>
+            <div class="demo-badge">Research & Development</div>
+        </div>
+        
+        <div id="statusPanel" class="status loading">
+            <div class="loading-indicator"></div>
+            <strong>Initializing Geospatial Service</strong>
+            <p>Preparing location-based address generation system</p>
+        </div>
+        
+        <button id="locationBtn" class="btn" onclick="initiateLocationCapture()" style="display: none;">
+            Capture Current Location
+        </button>
+        
+        <div id="locationPanel" class="location-panel">
+            <h3>Captured Coordinates</h3>
+            <div class="coordinates-grid">
+                <div class="coord-item">
+                    <strong>Latitude:</strong><br>
+                    <span id="latDisplay">--</span>
+                </div>
+                <div class="coord-item">
+                    <strong>Longitude:</strong><br>
+                    <span id="lonDisplay">--</span>
+                </div>
+                <div class="coord-item">
+                    <strong>Precision:</strong><br>
+                    <span id="accuracyDisplay">--</span>
+                </div>
+                <div class="coord-item">
+                    <strong>Captured:</strong><br>
+                    <span id="timeDisplay">--</span>
+                </div>
+            </div>
+        </div>
+        
+        <div id="digipinPanel" class="digipin-display">
+            <h3>Generated DIGIPIN Address</h3>
+            <div class="digipin-code" id="digipinOutput">--</div>
+            <div class="precision-indicator">
+                Grid Precision: <span id="precisionDisplay">--</span> meters | Level: <span id="levelDisplay">--</span>
+            </div>
+        </div>
+        
+        <div id="verificationPanel" class="verification-panel">
+            <h4>System Verification</h4>
+            <div id="verificationOutput"></div>
+        </div>
+        
+        <div id="actionPanel" style="display: none;">
+            <button class="btn" onclick="copyToClipboard()">Copy DIGIPIN</button>
+            <button class="btn" onclick="shareResults()">Share Results</button>
+            <button class="btn" onclick="resetSystem()" style="background: linear-gradient(135deg, #95a5a6, #7f8c8d);">Reset</button>
+        </div>
+        
+        <div class="academic-footer">
+            <p><strong>Technical Specifications:</strong> WGS84 Datum | 4×4 Hierarchical Grid | 10-Level Precision</p>
+            <p><strong>Coverage:</strong> 2.5°-38.5°N, 63.5°-99.5°E | <strong>Accuracy:</strong> ~3.7m at Level 10</p>
+            
+            <div class="orail-branding" style="margin-top: 25px; padding-top: 20px; border-top: 2px solid #e9ecef;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                    <div style="background: #d2691e; color: white; padding: 8px 16px; border: 3px solid #d2691e; border-radius: 8px; font-weight: bold; font-size: 14px;">
+                        ORAIL
+                    </div>
+                    <div style="color: #d2691e; font-weight: 700; font-size: 18px; letter-spacing: 1px;">
+                        OPEN RESPONSIBLE AI LITERACY
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Official DIGIPIN Implementation for Academic Demonstration
+        class AcademicDIGIPIN {
+            constructor() {
+                // Official boundaries and specifications
+                this.MIN_LAT = 2.5;
+                this.MAX_LAT = 38.5;
+                this.MIN_LON = 63.5;
+                this.MAX_LON = 99.5;
+                
+                this.GRID_SYMBOLS = [
+                    ['F', 'C', '9', '8'],
+                    ['J', '3', '2', '7'],
+                    ['K', '4', '5', '6'],
+                    ['L', 'M', 'P', 'T']
+                ];
+                
+                this.GRID_LEVELS = 10;
+                this.currentSession = null;
+            }
+            
+            isWithinBounds(lat, lon) {
+                return (lat >= this.MIN_LAT && lat <= this.MAX_LAT && 
+                        lon >= this.MIN_LON && lon <= this.MAX_LON);
+            }
+            
+            generateDIGIPIN(lat, lon) {
+                if (!this.isWithinBounds(lat, lon)) {
+                    throw new Error(`Coordinates outside coverage area (${this.MIN_LAT}°-${this.MAX_LAT}°N, ${this.MIN_LON}°-${this.MAX_LON}°E)`);
+                }
+                
+                let code = '';
+                let minLat = this.MIN_LAT, maxLat = this.MAX_LAT;
+                let minLon = this.MIN_LON, maxLon = this.MAX_LON;
+                
+                for (let level = 1; level <= this.GRID_LEVELS; level++) {
+                    const latDiv = (maxLat - minLat) / 4;
+                    const lonDiv = (maxLon - minLon) / 4;
+                    
+                    // Official algorithm implementation
+                    let row = 3 - Math.floor((lat - minLat) / latDiv);
+                    let col = Math.floor((lon - minLon) / lonDiv);
+                    
+                    // Boundary constraints
+                    row = Math.max(0, Math.min(row, 3));
+                    col = Math.max(0, Math.min(col, 3));
+                    
+                    code += this.GRID_SYMBOLS[row][col];
+                    
+                    // Add separators at specified levels
+                    if (level === 3 || level === 6) {
+                        code += '-';
+                    }
+                    
+                    // Update bounds for next iteration
+                    minLat = minLat + (3 - row) * latDiv;
+                    maxLat = minLat + latDiv;
+                    minLon = minLon + col * lonDiv;
+                    maxLon = minLon + lonDiv;
+                }
+                
+                const precision = this.calculatePrecision();
+                return { 
+                    code: code, 
+                    precision: precision, 
+                    level: this.GRID_LEVELS,
+                    bounds: { minLat, maxLat, minLon, maxLon }
+                };
+            }
+            
+            decodeDIGIPIN(code) {
+                const cleanCode = code.replace(/-/g, '');
+                if (cleanCode.length !== 10) {
+                    throw new Error('Invalid DIGIPIN format');
+                }
+                
+                let minLat = this.MIN_LAT, maxLat = this.MAX_LAT;
+                let minLon = this.MIN_LON, maxLon = this.MAX_LON;
+                
+                for (const symbol of cleanCode) {
+                    let row = -1, col = -1;
+                    
+                    // Locate symbol in grid
+                    for (let r = 0; r < 4; r++) {
+                        for (let c = 0; c < 4; c++) {
+                            if (this.GRID_SYMBOLS[r][c] === symbol) {
+                                row = r;
+                                col = c;
+                                break;
+                            }
+                        }
+                        if (row !== -1) break;
+                    }
+                    
+                    if (row === -1) throw new Error(`Invalid symbol: ${symbol}`);
+                    
+                    const latDiv = (maxLat - minLat) / 4;
+                    const lonDiv = (maxLon - minLon) / 4;
+                    
+                    // Decode using official algorithm
+                    minLat = minLat + (3 - row) * latDiv;
+                    maxLat = minLat + latDiv;
+                    minLon = minLon + col * lonDiv;
+                    maxLon = minLon + lonDiv;
+                }
+                
+                return {
+                    latitude: (minLat + maxLat) / 2,
+                    longitude: (minLon + maxLon) / 2,
+                    bounds: { minLat, maxLat, minLon, maxLon }
+                };
+            }
+            
+            calculatePrecision() {
+                const latRange = this.MAX_LAT - this.MIN_LAT;
+                const cellSize = latRange / Math.pow(4, this.GRID_LEVELS);
+                const centerLat = (this.MIN_LAT + this.MAX_LAT) / 2;
+                const meterConversion = cellSize * 111320 * Math.cos(centerLat * Math.PI / 180);
+                return meterConversion;
+            }
+        }
+        
+        // Calculate geodetic distance
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371000; // Earth radius in meters
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                     Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+        
+        // Initialize system
+        const digipinSystem = new AcademicDIGIPIN();
+        
+        // System initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initializeSystem();
+            }, 1500);
+        });
+        
+        function initializeSystem() {
+            const statusPanel = document.getElementById('statusPanel');
+            
+            if (!navigator.geolocation) {
+                statusPanel.className = 'status error';
+                statusPanel.innerHTML = '<strong>Geolocation Unavailable</strong><p>Browser does not support location services</p>';
+                return;
+            }
+            
+            statusPanel.className = 'status success';
+            statusPanel.innerHTML = '<strong>System Ready</strong><p>Geospatial encoding system initialized and ready for location capture</p>';
+            document.getElementById('locationBtn').style.display = 'inline-block';
+        }
+        
+        function initiateLocationCapture() {
+            const statusPanel = document.getElementById('statusPanel');
+            const btn = document.getElementById('locationBtn');
+            
+            statusPanel.className = 'status loading';
+            statusPanel.innerHTML = '<div class="loading-indicator"></div><strong>Capturing Location</strong><p>Requesting high-precision coordinates from GPS system</p>';
+            btn.disabled = true;
+            
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 0
+            };
+            
+            navigator.geolocation.getCurrentPosition(
+                processLocationData,
+                handleLocationError,
+                options
+            );
+        }
+        
+        function processLocationData(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            const accuracy = position.coords.accuracy;
+            const timestamp = new Date(position.timestamp);
+            
+            digipinSystem.currentSession = { lat, lon, accuracy, timestamp };
+            
+            // Update coordinate displays
+            document.getElementById('latDisplay').textContent = lat.toFixed(8) + '°';
+            document.getElementById('lonDisplay').textContent = lon.toFixed(8) + '°';
+            document.getElementById('accuracyDisplay').textContent = '±' + accuracy.toFixed(1) + 'm';
+            document.getElementById('timeDisplay').textContent = timestamp.toLocaleTimeString();
+            
+            // Generate DIGIPIN
+            try {
+                const result = digipinSystem.generateDIGIPIN(lat, lon);
+                
+                // Display results
+                document.getElementById('digipinOutput').textContent = result.code;
+                document.getElementById('precisionDisplay').textContent = result.precision.toFixed(1);
+                document.getElementById('levelDisplay').textContent = result.level;
+                
+                // Perform verification
+                const decoded = digipinSystem.decodeDIGIPIN(result.code);
+                const distance = calculateDistance(lat, lon, decoded.latitude, decoded.longitude);
+                
+                // Determine accuracy status
+                let statusClass = 'status-acceptable';
+                let statusText = 'ACCEPTABLE';
+                if (distance < 5) {
+                    statusClass = 'status-excellent';
+                    statusText = 'EXCELLENT';
+                } else if (distance < result.precision) {
+                    statusClass = 'status-good';
+                    statusText = 'VERY GOOD';
+                } else if (distance < result.precision * 1.5) {
+                    statusClass = 'status-good';
+                    statusText = 'GOOD';
+                }
+                
+                document.getElementById('verificationOutput').innerHTML = `
+                    <div><strong>Input Coordinates:</strong> ${lat.toFixed(8)}, ${lon.toFixed(8)}</div>
+                    <div><strong>Decoded Center:</strong> ${decoded.latitude.toFixed(8)}, ${decoded.longitude.toFixed(8)}</div>
+                    <div><strong>Positional Error:</strong> ${distance.toFixed(3)} meters</div>
+                    <div><strong>Accuracy Assessment:</strong> <span class="${statusClass}">${statusText}</span></div>
+                `;
+                
+                // Update status
+                const statusPanel = document.getElementById('statusPanel');
+                statusPanel.className = 'status success';
+                statusPanel.innerHTML = '<strong>Processing Complete</strong><p>DIGIPIN successfully generated and verified against input coordinates</p>';
+                
+                // Show all panels
+                document.getElementById('locationPanel').style.display = 'block';
+                document.getElementById('digipinPanel').style.display = 'block';
+                document.getElementById('verificationPanel').style.display = 'block';
+                document.getElementById('actionPanel').style.display = 'block';
+                document.getElementById('locationBtn').disabled = false;
+                
+            } catch (error) {
+                handleLocationError({ code: 4, message: error.message });
+            }
+        }
+        
+        function handleLocationError(error) {
+            const statusPanel = document.getElementById('statusPanel');
+            const btn = document.getElementById('locationBtn');
+            
+            let message = '';
+            switch(error.code) {
+                case 1:
+                    message = 'Location access denied by user. Please enable location permissions.';
+                    break;
+                case 2:
+                    message = 'Location information unavailable. Please check GPS settings.';
+                    break;
+                case 3:
+                    message = 'Location request timeout. Please try again.';
+                    break;
+                default:
+                    message = error.message || 'Unknown error in location processing.';
+                    break;
+            }
+            
+            statusPanel.className = 'status error';
+            statusPanel.innerHTML = `<strong>Processing Error</strong><p>${message}</p>`;
+            btn.disabled = false;
+        }
+        
+        function copyToClipboard() {
+            const code = document.getElementById('digipinOutput').textContent;
+            if (code && code !== '--') {
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('DIGIPIN copied to clipboard: ' + code);
+                }).catch(() => {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = code;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert('DIGIPIN copied: ' + code);
+                });
+            }
+        }
+        
+        function shareResults() {
+            if (!digipinSystem.currentSession) return;
+            
+            const code = document.getElementById('digipinOutput').textContent;
+            const shareText = `DIGIPIN: ${code}\nCoordinates: ${digipinSystem.currentSession.lat.toFixed(6)}, ${digipinSystem.currentSession.lon.toFixed(6)}\nGenerated by Academic DIGIPIN System | ORAIL`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'DIGIPIN Academic Demonstration',
+                    text: shareText
+                }).catch(console.error);
+            } else {
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert('Results copied to clipboard!');
+                }).catch(() => {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = shareText;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert('Results copied!');
+                });
+            }
+        }
+        
+        function resetSystem() {
+            // Clear all displays
+            document.getElementById('locationPanel').style.display = 'none';
+            document.getElementById('digipinPanel').style.display = 'none';
+            document.getElementById('verificationPanel').style.display = 'none';
+            document.getElementById('actionPanel').style.display = 'none';
+            
+            // Reset status
+            document.getElementById('statusPanel').className = 'status success';
+            document.getElementById('statusPanel').innerHTML = '<strong>System Ready</strong><p>Ready for new location capture session</p>';
+            
+            // Clear session data
+            digipinSystem.currentSession = null;
+        }
+    </script>
+</body>
+</html>
