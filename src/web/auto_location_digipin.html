@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIGIPIN Auto Location | ORAIL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            font-weight: bold;
+        }
+        h1 { color: #2c3e50; }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .digipin-code {
+            font-size: 36px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            margin: 20px 0;
+            color: #667eea;
+            font-family: monospace;
+        }
+        .orail-footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+            color: #d2691e;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">IND</div>
+        <h1>INDIA POST DIGIPIN</h1>
+        <p>Automatic Location-based Digital Address</p>
+        
+        <button class="btn" onclick="getLocation()">Get My Location</button>
+        
+        <div id="result" style="display: none;">
+            <h3>Your DIGIPIN:</h3>
+            <div class="digipin-code" id="digipin">--</div>
+            <p id="coordinates">--</p>
+        </div>
+        
+        <div class="orail-footer">
+            <div>🔶 ORAIL 🔶</div>
+            <div>OPEN RESPONSIBLE AI LITERACY</div>
+        </div>
+    </div>
+
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+        
+        function showPosition(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            
+            // Simple DIGIPIN generation (placeholder)
+            const digipin = generateDIGIPIN(lat, lon);
+            
+            document.getElementById('digipin').textContent = digipin;
+            document.getElementById('coordinates').textContent = 
+                Coordinates: , ;
+            document.getElementById('result').style.display = 'block';
+        }
+        
+        function generateDIGIPIN(lat, lon) {
+            // Placeholder - returns sample DIGIPIN
+            return 'MCT-MJL-M8F8';
+        }
+    </script>
+</body>
+</html>
